@@ -18,6 +18,9 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
+    //user API routes
+    $router->get('login/', 'UserController@authenticate');
+
     $router->get('users', ['uses' => 'UserController@showAllUsers']);
 
     $router->get('users/{id}', ['uses' => 'UserController@showUser']);
@@ -27,4 +30,16 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->delete('users/{id}', ['uses' => 'UserController@delete']);
 
     $router->put('users/{id}', ['uses' => 'UserController@update']);
+
+//group API routes
+    $router->get('groups', ['uses' => 'GroupController@showAllGroups']);
+
+    $router->get('groups/{id}', ['uses' => 'GroupController@showGroup']);
+
+    $router->post('groups', ['uses' => 'GroupController@create']);
+
+    $router->delete('groups/{id}', ['uses' => 'GroupController@delete']);
+
+    $router->put('groups/{id}', ['uses' => 'GroupController@update']);
+
 });

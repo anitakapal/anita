@@ -2,11 +2,15 @@
 
 namespace App;
 
+use Illuminate\Auth\Authenticatable as AuthenticableTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 
-class User extends Model
+class User extends Model implements Authenticatable
 {
+    use AuthenticableTrait;
 
+    protected $table = 'users';
     /**
      * The attributes that are mass assignable.
      *
@@ -21,5 +25,5 @@ class User extends Model
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden = ['password'];
 }
