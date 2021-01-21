@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('contact_no');
             $table->string('email');
             $table->string('password')->nullable();
-            $table->string('api_token')->nullable();
+            $table->text('api_token')->nullable();
             $table->timestamps();
         });
     }

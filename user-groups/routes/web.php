@@ -28,7 +28,7 @@ $router->get('/', function () use ($router) {
 
 $router->group(['prefix' => 'api'], function () use ($router) {
     //user API routes
-    $router->get('login/', 'UserController@authenticate');
+    $router->post('login', 'AuthController@login');
 
     $router->get('users', ['uses' => 'UserController@showAllUsers']);
 

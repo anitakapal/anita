@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -15,30 +14,28 @@ class UserController extends Controller
         //$this->middleware('auth');
     }
 
-    public function authenticate(Request $request)
+    public function showAllUsers(Request $request)
     {
-        $this->validate($request, [
-            'email' => 'required',
-            'password' => 'required',
-        ]);
-        $user = User::where('email', $request->input('email'))->first();
-        if (Hash::check($request->input('password'), $user->password)) {
-            $apikey = base64_encode(Str::random(40));
-            User::where('email', $request->input('email'))->update(['api_token' => $apikey]);
-            return response()->json(['status' => 'success', 'api_token' => $apikey]);
+        $name = $request->get('name');
+        if ($name) {
+            $users = User::where('name', 'like', "%{$name}%")->get();
         } else {
-            return response()->json(['status' => 'fail'], 401);
+            $users = User::all();
         }
-    }
-
-    public function showAllUsers()
-    {
-        return response()->json(User::all());
+        return response()->json($users);
     }
 
     public function showUser($id)
     {
-        return response()->json(User::find($id));
+        try {
+            $user = User::findOrFail($id);
+
+            return response()->json(['user' => $user], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json(['message' => 'user not found!'], 404);
+        }
     }
 
     public function create(Request $request)
@@ -47,6 +44,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'contact_no' => 'required|unique:users',
+            'password' => 'required',
         ]);
         //dd($request->password);
         $user = User::create($request->all());

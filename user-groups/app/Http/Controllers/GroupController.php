@@ -12,7 +12,7 @@ class GroupController extends Controller
 {
     public function __construct()
     {
-        //$this->middleware('auth');
+        $this->middleware('auth');
     }
 
     public function showAllGroups()
@@ -25,7 +25,15 @@ class GroupController extends Controller
 
     public function showGroup($id)
     {
-        return response()->json(Group::find($id));
+        try {
+            $group = Group::findOrFail($id);
+
+            return response()->json(Group::find($id), 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json(['message' => 'user not found!'], 404);
+        }
     }
 
     public function addMembers(Request $request, $id)
@@ -77,18 +85,22 @@ class GroupController extends Controller
 
     public function joinGroup(Request $request, $id)
     {
-        $this->validate($request, [
-            'user_id' => 'required',
-        ]);
+        $key = explode(' ', $request->header('Authorization'));
+        $user = User::where('api_token', $key[1])->first();
+
         $data = [];
         //dd($request->user_id);
-        $userExist = GroupHasMember::where(['member_id' => $request->user_id, 'group_id' => $id])->first();
-        if ($userExist) {
-            $data = ['msg' => 'User already exists in this group'];
-        } else {
-            $data = GroupHasMember::create(['group_id' => $id, 'member_id' => $request->user_id, 'joined_by' => 'user']);
+        if ($user != null) {
+            $userExist = GroupHasMember::where(['member_id' => $user->id, 'group_id' => $id])->first();
+            if ($userExist) {
+                $data = ['message' => 'User already exists in this group'];
+            } else {
+                $data = GroupHasMember::create(['group_id' => $id, 'member_id' => $request->user_id, 'joined_by' => 'user']);
+
+            }
 
         }
+        $data = 'Unathorized';
 
         return response()->json($data, 201);
     }
