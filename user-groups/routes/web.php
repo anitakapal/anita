@@ -53,5 +53,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->post('groups/{id}/members', ['uses' => 'GroupController@addMembers']);
     $router->get('groups/{id}/members', ['uses' => 'GroupController@showGroupMembers']);
+    $router->delete('groups/{id}/members/{member_ids}', ['uses' => 'GroupController@removeGroupMember']);
+    $router->post('groups/{id}/join-group', ['uses' => 'GroupController@joinGroup']);
 
 });
