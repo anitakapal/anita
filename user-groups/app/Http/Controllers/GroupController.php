@@ -7,6 +7,8 @@ use App\GroupHasMember;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class GroupController extends Controller
 {
@@ -32,7 +34,7 @@ class GroupController extends Controller
 
         } catch (\Exception $e) {
 
-            return response()->json(['message' => 'user not found!'], 404);
+            return response()->json(['message' => 'Invalid group!'], 404);
         }
     }
 
@@ -41,6 +43,7 @@ class GroupController extends Controller
         $this->validate($request, [
             'member_id' => 'required',
         ]);
+        //member_id is string of user ids to add in this group
         $member_ids = explode(',', $request->member_id);
         $data = [];
         foreach ($member_ids as $member) {
@@ -85,33 +88,31 @@ class GroupController extends Controller
 
     public function joinGroup(Request $request, $id)
     {
-        $key = explode(' ', $request->header('Authorization'));
-        $user = User::where('api_token', $key[1])->first();
-
-        $data = [];
-        //dd($request->user_id);
-        if ($user != null) {
-            $userExist = GroupHasMember::where(['member_id' => $user->id, 'group_id' => $id])->first();
+        $user_id = Auth::user()->id;
+        try {
+            $userExist = GroupHasMember::where(['member_id' => $user_id, 'group_id' => $id])->first();
             if ($userExist) {
                 $data = ['message' => 'User already exists in this group'];
             } else {
-                $data = GroupHasMember::create(['group_id' => $id, 'member_id' => $request->user_id, 'joined_by' => 'user']);
-
+                $data = GroupHasMember::create(['group_id' => $id, 'member_id' => $user_id, 'joined_by' => 'user']);
             }
+            return response()->json($data, 200);
 
+        } catch (\Exception $e) {
+
+            return response()->json(['message' => 'Unathorized'], 404);
         }
-        $data = 'Unathorized';
 
         return response()->json($data, 201);
     }
 
     public function create(Request $request)
     {
+        $user_id = Session::get('user_id');
         $this->validate($request, [
             'group_name' => 'required|unique:groups',
-            'group_created_by' => 'required',
         ]);
-        $group = Group::create($request->all());
+        $group = Group::create(['group_name' => $request->group_name, 'group_created_by' => $user_id]);
 
         return response()->json($group, 201);
     }

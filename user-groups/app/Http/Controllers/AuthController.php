@@ -22,6 +22,8 @@ class AuthController extends Controller
         if (!$token = Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+        $request->session()->put('user_id', Auth::user()->id);
+
         $user = User::find(Auth::user()->id);
         $user->api_token = $token;
         $user->save();

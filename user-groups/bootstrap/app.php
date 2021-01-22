@@ -61,6 +61,8 @@ $app->singleton(
 
 $app->configure('app');
 
+$app->configure('session');
+
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -80,6 +82,18 @@ $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
 ]);
 
+$app->middleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+]);
+
+$app->singleton(Illuminate\Session\SessionManager::class, function () use ($app) {
+    return $app->loadComponent('session', Illuminate\Session\SessionServiceProvider::class, 'session');
+});
+
+// $app->singleton('session.store', function () use ($app) {
+//     return $app->loadComponent('session', Illuminate\Session\SessionServiceProvider::class, 'session.store');
+// });
+
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -90,8 +104,9 @@ $app->routeMiddleware([
 | totally optional, so you are not required to uncomment this line.
 |
  */
+$app->register(Illuminate\Session\SessionServiceProvider::class);
 
-//$app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
