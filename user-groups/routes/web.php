@@ -41,7 +41,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->put('users/{id}', ['uses' => 'UserController@update']);
 
 //group API routes
-    $router->get('groups', ['uses' => 'GroupController@showAllGroups']);
+    $router->get('groups', ['uses' => 'GroupController@index']);
 
     $router->get('groups/{id}', ['uses' => 'GroupController@showGroup']);
 

@@ -5,32 +5,44 @@ namespace App\Http\Controllers;
 use App\Group;
 use App\GroupHasMember;
 use App\Http\Controllers\Controller;
+use App\Transformers\GroupTransformer;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use League\Fractal;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 
 class GroupController extends Controller
 {
+    private $fractal;
     public function __construct()
     {
         $this->middleware('auth');
+        $this->fractal = new Manager();
+
     }
 
-    public function showAllGroups()
+    public function index()
     {
-        // $user = Auth::user()->get();
-        // return response()->json(['status' => 'success', 'result' => $user]);
+        $paginator = Group::paginate();
+        $groups = $paginator->getCollection();
+        $resource = new Collection($groups, new GroupTransformer);
+        $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
+        return $this->fractal->createData($resource)->toArray();
 
-        return response()->json(Group::all());
+        //return response()->json(Group::all());
     }
 
     public function showGroup($id)
     {
         try {
             $group = Group::findOrFail($id);
-
-            return response()->json(Group::find($id), 200);
+            $resource = new Item($group, new GroupTransformer);
+            return $this->fractal->createData($resource)->toArray();
+            //return response()->json(Group::find($id), 200);
 
         } catch (\Exception $e) {
 
@@ -108,7 +120,7 @@ class GroupController extends Controller
 
     public function create(Request $request)
     {
-        $user_id = Session::get('user_id');
+        $user_id = Auth::user()->id;
         $this->validate($request, [
             'group_name' => 'required|unique:groups',
         ]);
