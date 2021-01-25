@@ -11,9 +11,11 @@ use League\Fractal;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 
 class UserController extends Controller
 {
+    private $fractal;
     public function __construct()
     {
         $this->fractal = new Manager();
@@ -33,13 +35,12 @@ class UserController extends Controller
         return $this->fractal->createData($resource)->toArray();
     }
 
-    public function showUser($id)
+    public function show($id)
     {
         try {
             $user = User::findOrFail($id);
-
-            return response()->json(['user' => $user], 200);
-
+            $resource = new Item($user, new UserTransformer);
+            return $this->fractal->createData($resource)->toArray();
         } catch (\Exception $e) {
 
             return response()->json(['message' => 'user not found!'], 404);
@@ -48,30 +49,52 @@ class UserController extends Controller
 
     public function create(Request $request)
     {
+        //validate request parameters
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'contact_no' => 'required|unique:users',
             'password' => 'required',
         ]);
-        //dd($request->password);
         $user = User::create($request->all());
         $user->password = Hash::make($request->password);
         $user->save();
-        return response()->json($user, 201);
+        $resource = new Item($user, new UserTransformer);
+        return $this->fractal->createData($resource)->toArray();
+
     }
 
     public function update($id, Request $request)
     {
-        $user = User::findOrFail($id);
-        $user->update($request->all());
-
-        return response()->json($user, 200);
+        $this->validate($request, [
+            'email' => 'email|unique:users',
+            'contact_no' => 'unique:users',
+        ]);
+        //Return error 404 response if user was not found
+        if (!User::find($id)) {
+            return response()->json(['message' => 'user not found!'], 404);
+        }
+        $user = User::find($id)->update($request->all());
+        if ($user) {
+            //return updated data
+            $resource = new Item(User::find($id), new userTransformer);
+            return $this->fractal->createData($resource)->toArray();
+        }
+        //Return error 400 response if updated was not successful
+        return response()->json(['message' => 'Failed to update user!'], 400);
     }
 
     public function delete($id)
     {
-        User::findOrFail($id)->delete();
-        return response('Deleted Successfully', 200);
+        //Return error 404 response if user was not found
+        if (!User::find($id)) {
+            return response()->json(['message' => 'User not found!'], 404);
+        }
+        //Return  success response if delete was successful
+        if (User::find($id)->delete()) {
+            return response()->json(['message' => 'User deleted successfully!'], 410);
+        }
+        //Return error response if delete was not successful
+        return response()->json(['message' => 'Failed to delete user!'], 400);
     }
 }

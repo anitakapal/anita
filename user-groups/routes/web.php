@@ -12,15 +12,14 @@
 | and give it the Closure to call when that URI is requested.
 |
  */
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
 
-$router->get('/apiv2/users/{id}', ['middleware' => 'auth', function (Request $request, $id) {
-    $user = Auth::user();
+// $router->get('/apiv2/users/{id}', ['middleware' => 'auth', function (Request $request, $id) {
+//     $user = Auth::user();
 
-    $user = $request->user();
+//     $user = $request->user();
 
-    //
-}]);
+// }]);
 
 $router->get('/', function () use ($router) {
     return $router->app->version();
@@ -32,13 +31,12 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->get('users', ['uses' => 'UserController@index']);
 
-    $router->get('users/{id}', ['uses' => 'UserController@showUser']);
+    $router->get('users/{id}', ['uses' => 'UserController@show']);
 
     $router->post('users', ['uses' => 'UserController@create']);
+    $router->put('users/{id}', ['uses' => 'UserController@update']);
 
     $router->delete('users/{id}', ['uses' => 'UserController@delete']);
-
-    $router->put('users/{id}', ['uses' => 'UserController@update']);
 
 //group API routes
     $router->get('groups', ['uses' => 'GroupController@index']);

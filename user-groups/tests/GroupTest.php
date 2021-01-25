@@ -1,5 +1,4 @@
 <?php
-
 class GroupTest extends TestCase
 {
     /**
@@ -10,7 +9,9 @@ class GroupTest extends TestCase
 
     public function testShouldReturnAllGroups()
     {
+        $header = ['HTTP_Authorization' => 'bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwMFwvYXBpXC9sb2dpbiIsImlhdCI6MTYxMTU5MTUzMywiZXhwIjoxNjExNTk1MTMzLCJuYmYiOjE2MTE1OTE1MzMsImp0aSI6IjdxckNySTl0QlVvYUhBZjUiLCJzdWIiOjIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.JAY-pPTNySc3rvKqPs9Kr06DB91If2FI414hmykxQTw'];
 
+        $this->get("api/groups", $header);
         $this->get("api/groups", []);
         $this->seeStatusCode(200);
         $this->seeJsonStructure([
@@ -40,15 +41,17 @@ class GroupTest extends TestCase
     public function testShouldCreateGroup()
     {
         $parameters = [
-            'group_name' => 'XYZ',
-            'group_created_by' => 1,
+            'group_name' => 'ABC Group1',
         ];
 
-        $this->post("api/groups", $parameters, []);
-        $this->seeStatusCode(201);
+        $header = ['HTTP_Authorization' => 'bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwMFwvYXBpXC9sb2dpbiIsImlhdCI6MTYxMTU5MTUzMywiZXhwIjoxNjExNTk1MTMzLCJuYmYiOjE2MTE1OTE1MzMsImp0aSI6IjdxckNySTl0QlVvYUhBZjUiLCJzdWIiOjIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.JAY-pPTNySc3rvKqPs9Kr06DB91If2FI414hmykxQTw'];
+
+        $this->post("api/groups", $parameters, $header);
+        $this->seeStatusCode(200);
         $this->seeJsonStructure(
             ['data' =>
                 [
+                    'id',
                     'group_name',
                     'group_created_by',
                     'created_at',

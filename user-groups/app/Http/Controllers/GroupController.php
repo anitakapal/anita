@@ -40,7 +40,6 @@ class GroupController extends Controller
             $group = Group::findOrFail($id);
             $resource = new Item($group, new GroupTransformer);
             return $this->fractal->createData($resource)->toArray();
-            //return response()->json(Group::find($id), 200);
 
         } catch (\Exception $e) {
 
@@ -59,7 +58,9 @@ class GroupController extends Controller
         foreach ($member_ids as $member) {
             $data[] = ['group_id' => $id, 'member_id' => $member, 'created_at' => date('Y-m-d H:i:s')];
         }
+        //insert into group_has_member table(add members to a group)
         $group_members = GroupHasMember::insert($data);
+
         if ($group_members) {
             $group_members = GroupHasMember::where('group_id', $id)->pluck('member_id')->toArray();
             $group = Group::where('id', $id)->first();
@@ -77,6 +78,7 @@ class GroupController extends Controller
 
     public function showGroupMembers(Request $request, $id)
     {
+        //show all group members
         $group_members = GroupHasMember::where('group_id', $id)->pluck('member_id')->toArray();
         $group = Group::where('id', $id)->first();
 
@@ -122,9 +124,12 @@ class GroupController extends Controller
         $this->validate($request, [
             'group_name' => 'required|unique:groups',
         ]);
-        $group = Group::create(['group_name' => $request->group_name, 'group_created_by' => $user_id]);
+        $group = Group::create($request->all());
+        $group->group_created_by = $user_id;
+        $group->save();
 
-        return response()->json($group, 201);
+        $resource = new Item($group, new GroupTransformer);
+        return $this->fractal->createData($resource)->toArray();
     }
 
     public function update($id, Request $request)
