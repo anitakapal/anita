@@ -30,7 +30,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     //user API routes
     $router->post('login', 'AuthController@login');
 
-    $router->get('users', ['uses' => 'UserController@showAllUsers']);
+    $router->get('users', ['uses' => 'UserController@index']);
 
     $router->get('users/{id}', ['uses' => 'UserController@showUser']);
 

@@ -1,6 +1,6 @@
 <?php
 
-class GroupTest extends TestCase
+class UserTest extends TestCase
 {
     /**
      * A basic test example.
@@ -8,16 +8,19 @@ class GroupTest extends TestCase
      * @return void
      */
 
-    public function testShouldReturnAllGroups()
+    //Test cases for user apis
+
+    public function testShouldReturnAllUsers()
     {
 
-        $this->get("api/groups", []);
+        $this->get("api/users", []);
         $this->seeStatusCode(200);
         $this->seeJsonStructure([
             'data' => ['*' =>
                 [
-                    'group_name',
-                    'group_created_by',
+                    'name',
+                    'email',
+                    'contact_no',
                     'created_at',
                     'updated_at',
                     'links',
@@ -37,26 +40,33 @@ class GroupTest extends TestCase
 
     }
 
-    public function testShouldCreateGroup()
+    public function testShouldCreateUser()
     {
+
         $parameters = [
-            'group_name' => 'XYZ',
-            'group_created_by' => 1,
+            'name' => 'neha',
+            'email' => 'neha@gmail.com',
+            'contact_no' => '9866654564',
+            'password' => 'ffggf',
         ];
 
-        $this->post("api/groups", $parameters, []);
+        // $res = $this->post("api/users", $parameters, []);
+        // dd($res);
+        $this->post("api/users", $parameters, []);
+
         $this->seeStatusCode(201);
         $this->seeJsonStructure(
             ['data' =>
                 [
-                    'group_name',
-                    'group_created_by',
+                    'name',
+                    'email',
+                    'contact_no',
                     'created_at',
                     'updated_at',
                     'links',
                 ],
             ]
         );
-
     }
+
 }

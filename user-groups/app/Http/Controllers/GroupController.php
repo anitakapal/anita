@@ -32,8 +32,6 @@ class GroupController extends Controller
         $resource = new Collection($groups, new GroupTransformer);
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
         return $this->fractal->createData($resource)->toArray();
-
-        //return response()->json(Group::all());
     }
 
     public function showGroup($id)

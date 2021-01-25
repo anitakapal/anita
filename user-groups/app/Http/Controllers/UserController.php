@@ -3,26 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Transformers\UserTransformer;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use League\Fractal;
+use League\Fractal\Manager;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\Resource\Collection;
 
 class UserController extends Controller
 {
     public function __construct()
     {
-        //$this->middleware('auth');
+        $this->fractal = new Manager();
     }
 
-    public function showAllUsers(Request $request)
+    public function index(Request $request)
     {
         $name = $request->get('name');
         if ($name) {
-            $users = User::where('name', 'like', "%{$name}%")->get();
+            $paginator = User::where('name', 'like', "%{$name}%")->paginate();
         } else {
-            $users = User::all();
+            $paginator = User::paginate();
         }
-        return response()->json($users);
+        $users = $paginator->getCollection();
+        $resource = new Collection($users, new UserTransformer);
+        $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
+        return $this->fractal->createData($resource)->toArray();
     }
 
     public function showUser($id)
