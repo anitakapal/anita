@@ -23,6 +23,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        //filter user by passing query string
         $name = $request->get('name');
         if ($name) {
             $paginator = User::where('name', 'like', "%{$name}%")->paginate();
@@ -37,6 +38,7 @@ class UserController extends Controller
 
     public function show($id)
     {
+        //fetch user data by userId
         try {
             $user = User::findOrFail($id);
             $resource = new Item($user, new UserTransformer);

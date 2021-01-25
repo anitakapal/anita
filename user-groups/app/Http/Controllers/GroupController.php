@@ -22,7 +22,6 @@ class GroupController extends Controller
     {
         $this->middleware('auth');
         $this->fractal = new Manager();
-
     }
 
     public function index()
