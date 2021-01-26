@@ -20,7 +20,7 @@ class GroupController extends Controller
     private $fractal;
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
         $this->fractal = new Manager();
     }
 

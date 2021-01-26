@@ -20,6 +20,9 @@
 //     $user = $request->user();
 
 // }]);
+// Route::middleware('auth')->group(function () {
+//     // Admin-only routes
+// });
 
 $router->get('/', function () use ($router) {
     return $router->app->version();
@@ -39,19 +42,20 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->delete('users/{id}', ['uses' => 'UserController@delete']);
 
 //group API routes
-    $router->get('groups', ['uses' => 'GroupController@index']);
+    $router->group(['middleware' => 'auth'], function () use ($router) {
+        $router->get('groups', ['uses' => 'GroupController@index']);
 
-    $router->get('groups/{id}', ['uses' => 'GroupController@showGroup']);
+        $router->get('groups/{id}', ['uses' => 'GroupController@showGroup']);
 
-    $router->post('groups', ['uses' => 'GroupController@create']);
+        $router->post('groups', ['uses' => 'GroupController@create']);
 
-    $router->delete('groups/{id}', ['uses' => 'GroupController@delete']);
+        $router->delete('groups/{id}', ['uses' => 'GroupController@delete']);
 
-    $router->put('groups/{id}', ['uses' => 'GroupController@update']);
+        $router->put('groups/{id}', ['uses' => 'GroupController@update']);
 
-    $router->post('groups/{id}/members', ['uses' => 'GroupController@addMembers']);
-    $router->get('groups/{id}/members', ['uses' => 'GroupController@showGroupMembers']);
-    $router->delete('groups/{id}/members/{member_ids}', ['uses' => 'GroupController@removeGroupMember']);
-    $router->post('groups/{id}/join-group', ['uses' => 'GroupController@joinGroup']);
-
+        $router->post('groups/{id}/members', ['uses' => 'GroupController@addMembers']);
+        $router->get('groups/{id}/members', ['uses' => 'GroupController@showGroupMembers']);
+        $router->delete('groups/{id}/members/{member_ids}', ['uses' => 'GroupController@removeGroupMember']);
+        $router->post('groups/{id}/join-group', ['uses' => 'GroupController@joinGroup']);
+    });
 });
