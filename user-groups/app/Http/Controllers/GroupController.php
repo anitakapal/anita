@@ -55,43 +55,40 @@ class GroupController extends Controller
         $member_ids = explode(',', $request->member_id);
         $data = [];
         foreach ($member_ids as $member) {
-            $data[] = ['group_id' => $id, 'member_id' => $member, 'created_at' => date('Y-m-d H:i:s')];
+            $check_member_exists = GroupHasMember::where(['group_id' => $id, 'member_id' => $member])->first();
+            //check if member already added to the group
+            if (!$check_member_exists) {
+                $data[] = ['group_id' => $id, 'member_id' => $member, 'created_at' => date('Y-m-d H:i:s')];
+            }
         }
         //insert into group_has_member table(add members to a group)
         $group_members = GroupHasMember::insert($data);
 
         if ($group_members) {
-            $group_members = GroupHasMember::where('group_id', $id)->pluck('member_id')->toArray();
-            $group = Group::where('id', $id)->first();
-
-            $members = User::whereIn('id', $group_members)->get();
+            $members = Group::find($id)->members;
             $userdata = [];
             foreach ($members as $member) {
-                $userdata[] = ['id' => $member->id, 'name' => $member->name];
+                $userdata[] = User::find($member->member_id);
             }
-            $groupData = ['group_name' => $group->group_name, 'group_created_by' => $group->group_created_by, 'memebers' => $userdata];
-
+            $groupData = ['data' => $userdata];
         }
         return response()->json($groupData, 201);
     }
 
-    public function showGroupMembers(Request $request, $id)
+    public function showGroupMembers($id)
     {
-        //show all group members
-        $group_members = GroupHasMember::where('group_id', $id)->pluck('member_id')->toArray();
-        $group = Group::where('id', $id)->first();
-
-        $members = User::whereIn('id', $group_members)->get();
+        //show all members of group
+        $group_members = Group::find($id)->members;
         $userdata = [];
-        foreach ($members as $member) {
-            $userdata[] = $member->name;
+        foreach ($group_members as $member) {
+            $userdata[] = User::find($member->id);
         }
-        $data = ['group_name' => $group->group_name, 'group_created_by' => $group->group_created_by, 'memebers' => $userdata];
-        return response()->json($data);
+        return response()->json(['message' => 'Success', 'data' => $userdata], 200);
     }
 
-    public function removeGroupMember(Request $request, $id, $member_ids)
+    public function removeGroupMember($id, $member_ids)
     {
+        //member_id is string of user ids remove from this group
         $member_ids = explode(',', $member_ids);
         GroupHasMember::whereIn('member_id', $member_ids)->where('group_id', $id)->delete();
         return response('Deleted Successfully', 200);

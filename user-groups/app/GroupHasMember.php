@@ -22,5 +22,8 @@ class GroupHasMember extends Model
      *
      * @var array
      */
-    protected $hidden = [];
+    public function members()
+    {
+        return $this->hasMany(User::class, 'id');
+    }
 }

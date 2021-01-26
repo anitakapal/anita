@@ -46,4 +46,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return [];
     }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
 }
