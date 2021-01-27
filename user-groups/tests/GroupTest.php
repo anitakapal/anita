@@ -6,7 +6,7 @@ class GroupTest extends TestCase
      *
      * @return void
      */
-
+    //show all groups
     public function testShouldReturnAllGroups()
     {
         $header = ['HTTP_Authorization' => 'bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwMFwvYXBpXC9sb2dpbiIsImlhdCI6MTYxMTU5MTUzMywiZXhwIjoxNjExNTk1MTMzLCJuYmYiOjE2MTE1OTE1MzMsImp0aSI6IjdxckNySTl0QlVvYUhBZjUiLCJzdWIiOjIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.JAY-pPTNySc3rvKqPs9Kr06DB91If2FI414hmykxQTw'];
@@ -38,6 +38,7 @@ class GroupTest extends TestCase
 
     }
 
+    // create new group
     public function testShouldCreateGroup()
     {
         $parameters = [
@@ -61,5 +62,43 @@ class GroupTest extends TestCase
             ]
         );
 
+    }
+
+    // add members to group
+    public function testShouldAddMembersToGroup()
+    {
+        $parameters = [
+            'member_id' => '1,2',
+        ];
+
+        $header = ['HTTP_Authorization' => 'bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwMFwvYXBpXC9sb2dpbiIsImlhdCI6MTYxMTc2ODA4OCwiZXhwIjoxNjExNzcxNjg4LCJuYmYiOjE2MTE3NjgwODgsImp0aSI6IkJtcDRybWljbFFDNWp4YzAiLCJzdWIiOjQsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.AJkU5id1EMjBv6fqUyQ_RuTqDKIk-_oWOBhPP69YzTM'];
+
+        $this->post("api/groups/1/members", $parameters, $header);
+        $this->seeStatusCode(200);
+        $this->seeJsonStructure([
+            'data' => ['*' =>
+                [
+                    'name',
+                    'email',
+                    'contact_no',
+                    'created_at',
+                    'updated_at',
+                    'links',
+                ],
+            ],
+
+        ]);
+    }
+
+    // delete group members
+    public function testShouldDeleteMembers()
+    {
+        $header = ['HTTP_Authorization' => 'bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwMFwvYXBpXC9sb2dpbiIsImlhdCI6MTYxMTc2ODA4OCwiZXhwIjoxNjExNzcxNjg4LCJuYmYiOjE2MTE3NjgwODgsImp0aSI6IkJtcDRybWljbFFDNWp4YzAiLCJzdWIiOjQsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.AJkU5id1EMjBv6fqUyQ_RuTqDKIk-_oWOBhPP69YzTM'];
+
+        $this->delete("api/groups/2/members/2", [], $header);
+        $this->seeStatusCode(410);
+        $this->seeJsonStructure([
+            'message',
+        ]);
     }
 }

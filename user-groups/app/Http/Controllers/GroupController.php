@@ -6,6 +6,7 @@ use App\Group;
 use App\GroupHasMember;
 use App\Http\Controllers\Controller;
 use App\Transformers\GroupTransformer;
+use App\Transformers\UserTransformer;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,7 @@ class GroupController extends Controller
 
     public function index()
     {
+        //show all groups
         $paginator = Group::paginate();
         $groups = $paginator->getCollection();
         $resource = new Collection($groups, new GroupTransformer);
@@ -35,6 +37,7 @@ class GroupController extends Controller
 
     public function showGroup($id)
     {
+        //show group deatils
         try {
             $group = Group::findOrFail($id);
             $resource = new Item($group, new GroupTransformer);
@@ -51,7 +54,12 @@ class GroupController extends Controller
         $this->validate($request, [
             'member_id' => 'required',
         ]);
-        //member_id is string of user ids to add in this group
+        $user_id = Auth::user()->id;
+        $check_group_creator = Group::where(['id' => $id, 'group_created_by' => $user_id])->first();
+        if ($check_group_creator == null) {
+            return response()->json(['message' => 'Only Group creator can add members.'], 401);
+        }
+        //member_id is string of user_ids to add in this group
         $member_ids = explode(',', $request->member_id);
         $data = [];
         foreach ($member_ids as $member) {
@@ -63,16 +71,16 @@ class GroupController extends Controller
         }
         //insert into group_has_member table(add members to a group)
         $group_members = GroupHasMember::insert($data);
-
         if ($group_members) {
             $members = Group::find($id)->members;
             $userdata = [];
             foreach ($members as $member) {
                 $userdata[] = User::find($member->member_id);
             }
-            $groupData = ['data' => $userdata];
+            $resource = new Collection($userdata, new UserTransformer);
+            return $this->fractal->createData($resource)->toArray();
         }
-        return response()->json($groupData, 201);
+        return response()->json(['message' => 'Failed to add members!'], 400);
     }
 
     public function showGroupMembers($id)
@@ -80,10 +88,12 @@ class GroupController extends Controller
         //show all members of group
         $group_members = Group::find($id)->members;
         $userdata = [];
+        //get all member_id of from group_has_members
         foreach ($group_members as $member) {
             $userdata[] = User::find($member->id);
         }
-        return response()->json(['message' => 'Success', 'data' => $userdata], 200);
+        $resource = new Collection($userdata, new UserTransformer);
+        return $this->fractal->createData($resource)->toArray();
     }
 
     public function removeGroupMember($id, $member_ids)
@@ -91,13 +101,14 @@ class GroupController extends Controller
         //member_id is string of user ids remove from this group
         $member_ids = explode(',', $member_ids);
         GroupHasMember::whereIn('member_id', $member_ids)->where('group_id', $id)->delete();
-        return response('Deleted Successfully', 200);
+        return response()->json(['message' => 'Deleted successfully!'], 410);
     }
 
     public function joinGroup(Request $request, $id)
     {
         $user_id = Auth::user()->id;
         try {
+            //check member already exists in this group or not
             $userExist = GroupHasMember::where(['member_id' => $user_id, 'group_id' => $id])->first();
             if ($userExist) {
                 $data = ['message' => 'User already exists in this group'];
@@ -107,10 +118,8 @@ class GroupController extends Controller
             return response()->json($data, 200);
 
         } catch (\Exception $e) {
-
             return response()->json(['message' => 'Unathorized'], 404);
         }
-
         return response()->json($data, 201);
     }
 
@@ -123,7 +132,6 @@ class GroupController extends Controller
         $group = Group::create($request->all());
         $group->group_created_by = $user_id;
         $group->save();
-
         $resource = new Item($group, new GroupTransformer);
         return $this->fractal->createData($resource)->toArray();
     }
@@ -132,7 +140,6 @@ class GroupController extends Controller
     {
         $group = Group::findOrFail($id);
         $group->update($request->all());
-
         return response()->json($group, 200);
     }
 
