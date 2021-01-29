@@ -4,16 +4,17 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Group extends Model
+class GroupUser extends Model
 {
     protected $dateFormat = 'U';
-    protected $table = 'groups';
+    protected $table = 'group_user';
+
     protected $fillable = [
-        'name', 'created_by', 'type',
+        'group_id', 'user_id', 'joined_by',
     ];
 
     public function members()
     {
-        return $this->hasMany(GroupUser::class, 'group_id');
+        return $this->hasMany(User::class, 'id');
     }
 }

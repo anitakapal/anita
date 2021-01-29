@@ -21,6 +21,11 @@ class UserController extends Controller
         $this->fractal = new Manager();
     }
 
+    protected function getDateFormat()
+    {
+        return 'U';
+    }
+
     public function index(Request $request)
     {
         //filter user by passing query string

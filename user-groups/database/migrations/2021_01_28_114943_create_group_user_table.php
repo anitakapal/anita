@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateGroupHasMembersTable extends Migration
+class CreateGroupUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,13 +14,14 @@ class CreateGroupHasMembersTable extends Migration
     public function up()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::create('group_has_members', function (Blueprint $table) {
-            $table->id();
+        Schema::create('group_user', function (Blueprint $table) {
+            $table->primary(['group_id', 'user_id']);
             $table->integer('group_id');
-            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('user_id');
             $table->enum('joined_by', ['admin', 'user']);
-            $table->timestamps();
-            $table->foreign('member_id')
+            $table->integer('created_at');
+            $table->integer('updated_at');
+            $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->onCascade('delete');
@@ -37,7 +38,7 @@ class CreateGroupHasMembersTable extends Migration
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('group_has_members');
+        Schema::dropIfExists('group_user');
         Schema::enableForeignKeyConstraints();
     }
 }

@@ -10,8 +10,9 @@ class GroupTransformer extends Fractal\TransformerAbstract
     {
         return [
             'id' => (int) $group->id,
-            'group_name' => $group->group_name,
-            'group_created_by' => $group->group_created_by,
+            'name' => $group->name,
+            'created_by' => $group->created_by,
+            'type' => $group->type,
             'created_at' => $group->created_at->format('d-m-Y'),
             'updated_at' => $group->updated_at->format('d-m-Y'),
             'links' => [
