@@ -21,17 +21,16 @@ class GroupController extends Controller
     private $fractal;
     public function __construct()
     {
-        //$this->middleware('auth');
         $this->fractal = new Manager();
     }
+
     /**
-     * Undocumented function
+     * Show all groups
      *
      * @return void
      */
     public function index()
     {
-        //show all groups
         $paginator = Group::paginate();
         $groups = $paginator->getCollection();
         $resource = new Collection($groups, new GroupTransformer);
@@ -60,6 +59,14 @@ class GroupController extends Controller
         }
     }
 
+    /**
+     * Add members to group
+     *
+     * @param Request $request user ids
+     * @param int $id id of group
+     *
+     * @return void
+     */
     public function addMembers(Request $request, $id)
     {
         $this->validate($request, [
@@ -67,11 +74,15 @@ class GroupController extends Controller
         ]);
         $user_id = Auth::user()->id;
         $check_group = Group::find($id);
-        //check group is public or private
+        /**
+         * check group is public or private
+         */
         if ($check_group->type == 'private' && $user_id != $check_group->created_by) {
             return response()->json(['message' => 'Only Group creator can add members.'], 401);
         }
-        //member_id is string of user_ids to add in this group
+        /**
+         * member_id is string of user_ids to add in this group
+         */
         $user_ids = explode(',', $request->member_id);
         $data = [];
         foreach ($user_ids as $member) {
@@ -81,7 +92,9 @@ class GroupController extends Controller
                 $data[] = ['group_id' => $id, 'user_id' => $member, 'created_at' => time(), 'updated_at' => time()];
             }
         }
-        //insert into group_has_member table(add members to a group)
+        /**
+         * insert into group_has_member table(add members to a group)
+         */
         $group_members = GroupUser::insert($data);
         if ($group_members) {
             $members = Group::find($id)->members;
@@ -95,12 +108,20 @@ class GroupController extends Controller
         return response()->json(['message' => 'Failed to add members!'], 400);
     }
 
+    /**
+     * Show all group members
+     *
+     * @param int $id id of group
+     *
+     * @return void
+     */
     public function showGroupMembers($id)
     {
-        //show all members of group
         $group_members = Group::find($id)->members;
         $userdata = [];
-        //get all user_id of from group_has_members
+        /**
+         * get all user_id of from group_user table
+         */
         foreach ($group_members as $member) {
             $userdata[] = User::find($member->user_id);
         }
@@ -108,6 +129,14 @@ class GroupController extends Controller
         return $this->fractal->createData($resource)->toArray();
     }
 
+    /**
+     * Remove members from group
+     *
+     * @param int $id id of group
+     * @param int $member_ids id of users to be removed from group
+     *
+     * @return void
+     */
     public function removeGroupMember($id, $member_ids)
     {
         //user_id is string of user ids remove from this group
@@ -116,6 +145,13 @@ class GroupController extends Controller
         return response()->json(['message' => 'Deleted successfully!'], 410);
     }
 
+    /**
+     * Create new group
+     *
+     * @param Request $request
+     *
+     * @return void
+     */
     public function create(Request $request)
     {
         $user_id = Auth::user()->id;
@@ -130,6 +166,14 @@ class GroupController extends Controller
         return $this->fractal->createData($resource)->toArray();
     }
 
+    /**
+     * Update group by id
+     *
+     * @param int $id id of group
+     * @param Request $request
+     *
+     * @return void
+     */
     public function update($id, Request $request)
     {
         $group = Group::findOrFail($id);
@@ -137,6 +181,13 @@ class GroupController extends Controller
         return response()->json($group, 200);
     }
 
+    /**
+     * Delete group by id
+     *
+     * @param int $id id of group
+     *
+     * @return void
+     */
     public function delete($id)
     {
         Group::findOrFail($id)->delete();

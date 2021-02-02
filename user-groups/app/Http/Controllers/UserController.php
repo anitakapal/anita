@@ -21,11 +21,13 @@ class UserController extends Controller
         $this->fractal = new Manager();
     }
 
-    protected function getDateFormat()
-    {
-        return 'U';
-    }
-
+    /**
+     * Show all users
+     *
+     * @param Request $request
+     *
+     * @return void
+     */
     public function index(Request $request)
     {
         //filter user by passing query string
@@ -41,6 +43,13 @@ class UserController extends Controller
         return $this->fractal->createData($resource)->toArray();
     }
 
+    /**
+     * Show user by id
+     *
+     * @param int $id id of user
+     *
+     * @return void
+     */
     public function show($id)
     {
         //fetch user data by userId
@@ -54,6 +63,13 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Create new user
+     *
+     * @param Request $request
+     *
+     * @return void
+     */
     public function create(Request $request)
     {
         //validate request parameters
@@ -71,37 +87,46 @@ class UserController extends Controller
 
     }
 
+    /**
+     * Update user by id
+     *
+     * @param int $id id of user
+     * @param Request $request
+     *
+     * @return void
+     */
     public function update($id, Request $request)
     {
         $this->validate($request, [
             'email' => 'email|unique:users',
             'contact_no' => 'unique:users',
         ]);
-        //Return error 404 response if user was not found
         if (!User::find($id)) {
             return response()->json(['message' => 'user not found!'], 404);
         }
         $user = User::find($id)->update($request->all());
         if ($user) {
-            //return updated data
             $resource = new Item(User::find($id), new userTransformer);
             return $this->fractal->createData($resource)->toArray();
         }
-        //Return error 400 response if updated was not successful
         return response()->json(['message' => 'Failed to update user!'], 400);
     }
 
+    /**
+     * Delete user by id
+     *
+     * @param int $id id of user
+     *
+     * @return void
+     */
     public function delete($id)
     {
-        //Return error 404 response if user was not found
         if (!User::find($id)) {
             return response()->json(['message' => 'User not found!'], 404);
         }
-        //Return  success response if delete was successful
         if (User::find($id)->delete()) {
             return response()->json(['message' => 'User deleted successfully!'], 410);
         }
-        //Return error response if delete was not successful
         return response()->json(['message' => 'Failed to delete user!'], 400);
     }
 }
