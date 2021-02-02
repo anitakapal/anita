@@ -24,7 +24,11 @@ class GroupController extends Controller
         //$this->middleware('auth');
         $this->fractal = new Manager();
     }
-
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function index()
     {
         //show all groups
@@ -35,6 +39,13 @@ class GroupController extends Controller
         return $this->fractal->createData($resource)->toArray();
     }
 
+    /**
+     * Show group by id
+     *
+     * @param int $id id of the group
+     *
+     * @return void
+     */
     public function showGroup($id)
     {
         //show group deatils
