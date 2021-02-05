@@ -50,11 +50,9 @@ class GroupController extends Controller
         //show group deatils
         try {
             $group = Group::findOrFail($id);
-            $resource = new Item($group, new GroupTransformer);
+            $resource = new Item($group, new GroupTransformer());
             return $this->fractal->createData($resource)->toArray();
-
         } catch (\Exception $e) {
-
             return response()->json(['message' => 'Invalid group!'], 404);
         }
     }
@@ -102,7 +100,7 @@ class GroupController extends Controller
             foreach ($members as $member) {
                 $userdata[] = User::find($member->user_id);
             }
-            $resource = new Collection($userdata, new UserTransformer);
+            $resource = new Collection($userdata, new UserTransformer());
             return $this->fractal->createData($resource)->toArray();
         }
         return response()->json(['message' => 'Failed to add members!'], 400);
@@ -125,7 +123,7 @@ class GroupController extends Controller
         foreach ($group_members as $member) {
             $userdata[] = User::find($member->user_id);
         }
-        $resource = new Collection($userdata, new UserTransformer);
+        $resource = new Collection($userdata, new UserTransformer());
         return $this->fractal->createData($resource)->toArray();
     }
 
@@ -162,7 +160,7 @@ class GroupController extends Controller
         $group = Group::create($request->all());
         $group->created_by = $user_id;
         $group->save();
-        $resource = new Item($group, new GroupTransformer);
+        $resource = new Item($group, new GroupTransformer());
         return $this->fractal->createData($resource)->toArray();
     }
 

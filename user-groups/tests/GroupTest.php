@@ -85,9 +85,9 @@ class GroupTest extends TestCase
     }
 
     /**
-     * Remove user by id
+     * Create new group
      *
-     * @param array $user userdata array
+     * @param array $group groupdata array
      *
      * @return void
      * @depends testUserLogin
