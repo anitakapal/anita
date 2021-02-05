@@ -13,8 +13,8 @@ class UserTransformer extends Fractal\TransformerAbstract
             'name' => $user->name,
             'email' => $user->email,
             'contact_no' => $user->contact_no,
-            'created_at' => $user->created_at->format('d-m-Y'),
-            'updated_at' => $user->updated_at->format('d-m-Y'),
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
             'links' => [
                 [
                     'uri' => 'users/' . $user->id,

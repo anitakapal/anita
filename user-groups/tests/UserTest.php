@@ -1,39 +1,68 @@
 <?php
 
+/**
+ * /tests/UserTest.php
+ * PHP Version 7
+ *
+ * @category  TestCases
+ * @package   REST API
+ * @author    anita <anita@gmail.com>
+ * @copyright 2021 REST API
+ * @license   anita https://anita.com/legal/license
+ * @version   Release: 8.0.0
+ * @link      http://google.com
+ * @since     January 2021
+ */
+
+//namespace Tests;
+
+use Illuminate\Support\Facades\Cache;
+
+/**
+ * UserTest class
+ *
+ * @category  TestCases
+ * @package   REST API
+ * @author    anita <anita@gmail.com>
+ * @copyright 2021 REST API
+ * @license   anita https://anita.com/legal/license
+ * @version   Release: 8.0.0
+ * @link      http://google.com
+ */
 class UserTest extends TestCase
 {
-
+    /**
+     * Create empty array
+     *
+     * @return array
+     */
     public function testEmpty(): array
     {
-        //Cache::flush();
-
-        $stack = [];
-        $this->assertEmpty($stack);
-
-        return $stack;
+        Cache::flush();
+        $user = [];
+        $this->assertEmpty($user);
+        return $user;
     }
 
     /**
+     * Create new user
+     *
+     * @param array $user empty array
+     *
+     * @return array
      * @depends testEmpty
      */
-    public function testShouldCreateUser(array $stack): array
+    public function testShouldCreateUser(array $user): array
     {
-
         $parameters = [
-            'name' => 'sneha',
-            'email' => 'sneha@gmail.com',
+            'name' => 'test1',
+            'email' => 'test1@gmail.com',
             'contact_no' => '8866654564',
             'password' => '1234',
         ];
-
-        //$response = $this->call('GET', 'api/users/20');
-        $response = $this->call('POST', 'api/users', $parameters);
-
-        //$response = $this->get("api/users/2", [], []);
-        //dd($response->getContent());
-        $json_data = json_decode($response->getContent());
-        array_push($stack, $json_data->data);
-
+        $this->post('/api/users', $parameters, []);
+        $json_data = json_decode($this->response->getContent());
+        array_push($user, $json_data->data);
         $this->seeStatusCode(200);
         $this->seeJsonStructure(
             ['data' =>
@@ -49,25 +78,27 @@ class UserTest extends TestCase
             ]
         );
 
-        // $this->assertSame($parameters, $stack[count($stack) - 1]);
-        // $this->assertNotEmpty($stack);
-
-        return $stack;
+        return $user;
     }
 
     /**
-     * @depends testPush
+     * update user by id
+     *
+     * @param array $user userdata array
+     *
+     * @return array
+     * @depends testShouldCreateUser
      */
-    public function testShouldUpdateUser(array $stack): array
+    public function testShouldUpdateUser(array $user): array
     {
         $parameters = [
-            'name' => 'Sam',
-            'email' => 'sam@gmail.com',
+            'name' => 'test1 updated',
+            'email' => 'test1updated@gmail.com',
             'contact_no' => '9987656760',
             'password' => 'ffggf',
         ];
 
-        $this->put("api/users/" . $stack[0]->id, $parameters, []);
+        $this->put("api/users/" . $user[0]->id, $parameters, []);
         $this->seeStatusCode(200);
         $this->seeJsonStructure(
             ['data' =>
@@ -81,30 +112,23 @@ class UserTest extends TestCase
                 ],
             ]
         );
-        return $stack;
-
-        //$this->assertSame('foo', array_pop($stack));
-        //$this->assertEmpty($stack);
-    }
-
-    public function login(array $stack): array
-    {
-        $parameters = [
-            'email' => 'sneha@gmail.com',
-            'password' => '1234',
-        ];
-        $response = $this->call('POST', 'api/login', $parameters);
-        dd($response);
-        $json_data = json_decode($response->getContent());
+        $stack = [];
+        $json_data = json_decode($this->response->getContent());
         array_push($stack, $json_data->data);
         return $stack;
-
     }
 
-    public function testShouldDeleteUser(array $stack): void
+    /**
+     * Remove user by id
+     *
+     * @param array $user userdata array
+     *
+     * @return void
+     * @depends testShouldUpdateUser
+     */
+    public function testShouldDeleteUser(array $user): void
     {
-        //dd($stack);
-        $this->delete("api/users/" . $stack[0]->id, [], []);
+        $this->delete("api/users/" . $user[0]->id, [], []);
         $this->seeStatusCode(410);
         $this->seeJsonStructure([
             'message',

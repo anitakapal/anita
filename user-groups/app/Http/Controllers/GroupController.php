@@ -33,7 +33,7 @@ class GroupController extends Controller
     {
         $paginator = Group::paginate();
         $groups = $paginator->getCollection();
-        $resource = new Collection($groups, new GroupTransformer);
+        $resource = new Collection($groups, new GroupTransformer());
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
         return $this->fractal->createData($resource)->toArray();
     }

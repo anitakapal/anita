@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Transformers;
 
 use App\Group;
@@ -13,8 +14,8 @@ class GroupTransformer extends Fractal\TransformerAbstract
             'name' => $group->name,
             'created_by' => $group->created_by,
             'type' => $group->type,
-            'created_at' => $group->created_at->format('d-m-Y'),
-            'updated_at' => $group->updated_at->format('d-m-Y'),
+            'created_at' => $group->created_at,
+            'updated_at' => $group->updated_at,
             'links' => [
                 [
                     'uri' => 'groups/' . $group->id,
